@@ -28,6 +28,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import java.util.*
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.util.*
 
 
 
@@ -49,17 +61,17 @@ class MainActivity : ComponentActivity() {
                     .padding(16.dp)
             ) {
                 // space antar header
-                Spacer(modifier = Modifier.height(92.dp))
+                Spacer(modifier = Modifier.height(72.dp))
 
                 LinkInput()
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 logItems.forEachIndexed { index, logEntry ->
                     LogCard(index, logEntry, onDelete = {
                         logItems.removeAt(index)
                     })
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
 
                 AddLogButton {
@@ -83,7 +95,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // LINK
+    // HEADER
     @Composable
     fun Header() {
         val density = LocalDensity.current
@@ -140,145 +152,183 @@ class MainActivity : ComponentActivity() {
         var link by remember { mutableStateOf("") }
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFF9F9F9))
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "LINK",
-                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                fontSize = 20.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
             OutlinedTextField(
                 value = link,
                 onValueChange = { link = it },
+                placeholder = { Text("masukkan link..", color = Color.Gray) },
                 leadingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_link),
                         contentDescription = "Link Icon",
-                        tint = Color(0xFFA1A7B3) // gunakan kode warna langsung
+                        tint = Color.Gray
                     )
-                },
-                placeholder = {
-                    Text("masukkan link..", color = Color(0xFFA1A7B3))
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color(0xFFA1A7B3), shape = RoundedCornerShape(10.dp)),
+                    .height(56.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFA1A7B3),
-                    focusedBorderColor = Color(0xFF0133CC)
+                    focusedBorderColor = Color.LightGray,
+                    unfocusedBorderColor = Color.LightGray
                 )
             )
         }
     }
 
-
+    // LOG CARD
     @Composable
-    fun LogCard(index: Int, entry: LogEntry, onDelete: () -> Unit) {
+    fun LogCard(
+        logNumber: Int = 1,
+        logEntry: LogEntry,
+        onDelete: () -> Unit = {}
+    ) {
         val context = LocalContext.current
         val calendar = Calendar.getInstance()
+
+        var selectedDate by remember { mutableStateOf(logEntry.date) }
+        var selectedTime by remember { mutableStateOf(logEntry.time) }
+        var selectedShift by remember { mutableStateOf(logEntry.shift) }
+        var selectedModel by remember { mutableStateOf(logEntry.modelKerja) }
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, Color("A1A7B3"), RoundedCornerShape(10.dp)),
-            shape = RoundedCornerShape(10.dp)
+                .padding(8.dp),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color(0xFFA1A7B3)),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(0.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Log ${index + 1}", fontWeight = FontWeight.Bold)
+            Column(
+                modifier = Modifier.padding(12.dp)
+            ) {
+                Text(
+                    text = "Log $logNumber",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // DATE
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable {
+                        DatePickerDialog(
+                            context,
+                            { _, year, month, day ->
+                                selectedDate = String.format("%02d/%02d/%d", day, month + 1, year)
+                            },
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_calendar),
                         contentDescription = null,
-                        tint = Color("A1A7B3")
+                        tint = Color(0xFFA1A7B3),
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = entry.date.ifEmpty { "DD/MM/YY" },
-                        modifier = Modifier.clickable {
-                            val datePicker = DatePickerDialog(
-                                context,
-                                { _, year, month, day ->
-                                    entry.date = "%02d/%02d/%02d".format(day, month + 1, year % 100)
-                                },
-                                calendar.get(Calendar.YEAR),
-                                calendar.get(Calendar.MONTH),
-                                calendar.get(Calendar.DAY_OF_MONTH)
-                            )
-                            datePicker.show()
-                        }
+                    Text(
+                        text = if (selectedDate.isNotEmpty()) selectedDate else "DD/MM/YY",
+                        fontSize = 14.sp,
+                        color = Color(0xFFA1A7B3)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // TIME
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable {
+                        TimePickerDialog(
+                            context,
+                            { _, hour, minute ->
+                                val isAM = hour < 12
+                                val formattedHour = if (hour % 12 == 0) 12 else hour % 12
+                                selectedTime = String.format("%02d:%02d %s", formattedHour, minute, if (isAM) "AM" else "PM")
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            false
+                        ).show()
+                    }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_time),
                         contentDescription = null,
-                        tint = Color("A1A7B3")
+                        tint = Color(0xFFA1A7B3),
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = entry.time.ifEmpty { "0.00 AM" },
-                        modifier = Modifier.clickable {
-                            val timePicker = TimePickerDialog(
-                                context,
-                                { _, hour, minute ->
-                                    val isAm = hour < 12
-                                    val hour12 = if (hour == 0 || hour == 12) 12 else hour % 12
-                                    val ampm = if (isAm) "AM" else "PM"
-                                    entry.time = String.format("%d:%02d %s", hour12, minute, ampm)
-                                },
-                                calendar.get(Calendar.HOUR_OF_DAY),
-                                calendar.get(Calendar.MINUTE),
-                                false
-                            )
-                            timePicker.show()
-                        }
+                    Text(
+                        text = if (selectedTime.isNotEmpty()) selectedTime else "00:00 AM",
+                        fontSize = 14.sp,
+                        color = Color(0xFFA1A7B3)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 DropdownInput(
                     label = "Shift",
-                    options = listOf("Pagi", "Siang", "Sore"),
-                    selected = entry.shift,
-                    onSelectedChange = { entry.shift = it }
+                    options = listOf("Shift Pagi", "Shift Siang", "Shift Malam"),
+                    selected = selectedShift,
+                    onSelectedChange = { selectedShift = it }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 DropdownInput(
                     label = "Model Kerja",
-                    options = listOf("WFO", "WFA"),
-                    selected = entry.modelKerja,
-                    onSelectedChange = { entry.modelKerja = it }
+                    options = listOf("WFO", "WFH", "Dinas Luar"),
+                    selected = selectedModel,
+                    onSelectedChange = { selectedModel = it }
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = {
-                        showDeleteDialog(context, onDelete)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color("FEEDEC")),
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    modifier = Modifier.align(Alignment.End)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "Delete",
-                        tint = Color("F46352")
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Delete", color = Color("F46352"))
+                    Button(
+                        onClick = onDelete,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFEBEB),
+                            contentColor = Color(0xFFF46352)
+                        ),
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_delete),
+                            contentDescription = null,
+                            tint = Color(0xFFF46352),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Delete", fontSize = 14.sp)
+                    }
                 }
             }
         }
@@ -323,38 +373,42 @@ class MainActivity : ComponentActivity() {
     ) {
         var expanded by remember { mutableStateOf(false) }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, Color("A1A7B3"), RoundedCornerShape(8.dp))
-                .clickable { expanded = true }
-                .padding(12.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = if (selected.isNotEmpty()) selected else "Select option",
-                    color = if (selected.isNotEmpty()) Color("000000") else Color("A1A7B3")
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_dropdown),
-                    contentDescription = null,
-                    tint = Color("A1A7B3")
-                )
-            }
+        Column {
+            Text(text = label, fontSize = 14.sp, color = Color.Black)
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color("A1A7B3"), RoundedCornerShape(8.dp))
+                    .clickable { expanded = true }
+                    .padding(12.dp)
             ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            onSelectedChange(option)
-                            expanded = false
-                        }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = if (selected.isNotEmpty()) selected else "Select option",
+                        color = if (selected.isNotEmpty()) Color.Black else Color("A1A7B3")
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_dropdown),
+                        contentDescription = null,
+                        tint = Color("A1A7B3")
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                onSelectedChange(option)
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
