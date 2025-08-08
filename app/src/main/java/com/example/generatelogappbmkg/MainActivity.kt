@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -48,10 +49,21 @@ class MainActivity : ComponentActivity() {
             ) {
                 Header()
 
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f) // supaya scroll hanya di area ini
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(1.dp))
 
-                    Text("LINK", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(
+                        "LINK",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
@@ -81,10 +93,17 @@ class MainActivity : ComponentActivity() {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color("A1A7B3"))
+                        border = BorderStroke(1.dp, Color("A1A7B3")),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Log", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(
+                                "Log",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                             Spacer(modifier = Modifier.height(16.dp))
 
                             val calendar = Calendar.getInstance()
@@ -180,28 +199,45 @@ class MainActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Button(
-                                modifier = Modifier.align(Alignment.End),
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .height(36.dp), // tinggi tombol pendek
+                                shape = RoundedCornerShape(6.dp),
+                                border = BorderStroke(1.dp, Color(android.graphics.Color.parseColor("#0133CC"))), // border langsung di Button
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(android.graphics.Color.parseColor("#CFD9F6")), // fill biru muda
+                                    contentColor = Color(android.graphics.Color.parseColor("#0133CC")) // teks biru
+                                ),
                                 onClick = {
                                     if (date.isNotEmpty() && time.isNotEmpty() && shift.isNotEmpty() && modelKerja.isNotEmpty()) {
                                         generatedLogs.add("$date, $time, $shift, $modelKerja")
                                     }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color("0133CC"))
+                                }
                             ) {
-                                Text("Generate", color = Color.White)
+                                Text("Generate")
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("Generated", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        "Generated",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        border = BorderStroke(1.dp, Color("A1A7B3"))
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 300.dp, max = 300.dp) // batas tinggi
+                            .verticalScroll(rememberScrollState()),
+                        border = BorderStroke(1.dp, Color("A1A7B3")),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             generatedLogs.forEachIndexed { index, item ->
@@ -217,6 +253,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
+                        shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color("0133CC")),
                         onClick = {
                             Toast.makeText(this@MainActivity, "Data dikirim!", Toast.LENGTH_SHORT).show()
