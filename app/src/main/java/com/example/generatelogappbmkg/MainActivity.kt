@@ -85,70 +85,97 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("Log", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-
                             Spacer(modifier = Modifier.height(16.dp))
+
                             val calendar = Calendar.getInstance()
                             val context = LocalContext.current
 
-                            // Date
+                            // === Row untuk Tanggal & Waktu ===
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable {
-                                    DatePickerDialog(
-                                        context,
-                                        { _, y, m, d ->
-                                            date = String.format("%04d-%02d-%02d", y, m + 1, d)
-                                        },
-                                        calendar.get(Calendar.YEAR),
-                                        calendar.get(Calendar.MONTH),
-                                        calendar.get(Calendar.DAY_OF_MONTH)
-                                    ).show()
-                                }
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_calendar),
-                                    contentDescription = null,
-                                    tint = Color("A1A7B3"),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = if (date.isNotEmpty()) date else "DD/MM/YY", color = Color("A1A7B3"))
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            // Time
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable {
-                                    TimePickerDialog(
-                                        context,
-                                        { _, hour, minute ->
-                                            val ampm = if (hour < 12) "AM" else "PM"
-                                            val h = if (hour % 12 == 0) 12 else hour % 12
-                                            time = String.format("%02d:%02d %s", h, minute, ampm)
-                                        },
-                                        calendar.get(Calendar.HOUR_OF_DAY),
-                                        calendar.get(Calendar.MINUTE),
-                                        false
-                                    ).show()
+                                // Date
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .border(1.dp, Color("A1A7B3"), RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            DatePickerDialog(
+                                                context,
+                                                { _, y, m, d ->
+                                                    date = String.format("%04d-%02d-%02d", y, m + 1, d)
+                                                },
+                                                calendar.get(Calendar.YEAR),
+                                                calendar.get(Calendar.MONTH),
+                                                calendar.get(Calendar.DAY_OF_MONTH)
+                                            ).show()
+                                        }
+                                        .padding(12.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_calendar),
+                                        contentDescription = null,
+                                        tint = Color("A1A7B3"),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (date.isNotEmpty()) date else "DD/MM/YY",
+                                        color = Color("A1A7B3")
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_time),
-                                    contentDescription = null,
-                                    tint = Color("A1A7B3"),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = if (time.isNotEmpty()) time else "0.00 AM", color = Color("A1A7B3"))
+
+                                // Time
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .border(1.dp, Color("A1A7B3"), RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            TimePickerDialog(
+                                                context,
+                                                { _, hour, minute ->
+                                                    val ampm = if (hour < 12) "AM" else "PM"
+                                                    val h = if (hour % 12 == 0) 12 else hour % 12
+                                                    time = String.format("%02d:%02d %s", h, minute, ampm)
+                                                },
+                                                calendar.get(Calendar.HOUR_OF_DAY),
+                                                calendar.get(Calendar.MINUTE),
+                                                false
+                                            ).show()
+                                        }
+                                        .padding(12.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_time),
+                                        contentDescription = null,
+                                        tint = Color("A1A7B3"),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (time.isNotEmpty()) time else "0.00 AM",
+                                        color = Color("A1A7B3")
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            DropdownInput("Shift", listOf("P", "S", "M"), shift) { shift = it }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            DropdownInput("Model Kerja", listOf("WFO", "WFH", "DL"), modelKerja) { modelKerja = it }
+                            // === Row untuk Shift & Model Kerja ===
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    DropdownInput("Shift", listOf("P", "S", "M"), shift) { shift = it }
+                                }
+                                Box(modifier = Modifier.weight(1f)) {
+                                    DropdownInput("Model Kerja", listOf("WFO", "WFH", "DL"), modelKerja) { modelKerja = it }
+                                }
+                            }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
