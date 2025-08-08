@@ -66,4 +66,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
+// POST
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 }

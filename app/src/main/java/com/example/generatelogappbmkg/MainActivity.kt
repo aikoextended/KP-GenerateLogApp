@@ -26,6 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class MainActivity : ComponentActivity() {
 
@@ -256,7 +262,15 @@ class MainActivity : ComponentActivity() {
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color("0133CC")),
                         onClick = {
-                            Toast.makeText(this@MainActivity, "Data dikirim!", Toast.LENGTH_SHORT).show()
+                            if (link.isNotBlank() && generatedLogs.isNotEmpty()) {
+                                sendFileToServer(link, generatedLogs)
+                            } else {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Link & data tidak boleh kosong!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     ) {
                         Text("Kirim", color = Color.White, fontSize = 18.sp)
@@ -264,6 +278,48 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun sendFileToServer(url: String, logs: List<String>) {
+        if (url.isBlank()) return
+
+        val file = File.createTempFile("generated", ".txt")
+        FileOutputStream(file).use { fos ->
+            fos.write(logs.joinToString("\n").toByteArray())
+        }
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", "generated.txt", file.asRequestBody("text/plain".toMediaType()))
+            .build()
+
+        val request = Request.Builder()
+            .url(url)
+            .post(requestBody)
+            .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Gagal mengirim: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@MainActivity, "Data berhasil dikirim!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Gagal: ${response.code}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
     }
 
     @Composable
